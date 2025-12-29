@@ -68,7 +68,7 @@ function createTimeTemplate(id, dateFrom, dateTo) {
   `;
 }
 
-function createPriceTemplate(id, price) {
+function createPriceTemplate(id, price = 0) {
   return `<div class="event__field-group  event__field-group--price">
             <label class="event__label" for="event-price-${id}">
               <span class="visually-hidden">Price</span>
@@ -107,13 +107,12 @@ function createPictureTemplate(pictures) {
 function createEditEventTemplate(point, checkedOffer, offer, allOffers, destination, allDestinations) {
   const {basePrice, dateFrom, dateTo, type} = point;
   const pointId = point.id || 0;
-  const price = checkedOffer.reduce((accumulator, currentValue) => accumulator + currentValue.price, basePrice);
   const description = destination.description ? destination.description : '';
   const pictures = destination.pictures.length > 0 ? destination.pictures : [];
 
   const offresTemplate = createOffferTemplate(offer, checkedOffer);
   const buttonsTemplate = createButtonsTemplate(pointId);
-  const priceTemplate = createPriceTemplate(pointId, price);
+  const priceTemplate = createPriceTemplate(pointId, basePrice);
   const timeTemplate = createTimeTemplate(pointId, dateFrom, dateTo);
   const destinationTemplate = createGroupDestinationTemplate(allDestinations, type, destination, pointId);
   const typeTemplate = createTypeTemplate(allOffers, type, pointId);
@@ -154,13 +153,15 @@ function createEditEventTemplate(point, checkedOffer, offer, allOffers, destinat
 
 export default class EditEventView {
 
-  constructor({point, checkedOffer, offer, allOffers, destination, allDestinations}) {
+  constructor(pointsModel, point) {
+    this.pointsModel = pointsModel;
+
     this.point = point;
-    this.checkedOffer = checkedOffer;
-    this.offer = offer;
-    this.allOffers = allOffers;
-    this.destination = destination;
-    this.allDestinations = allDestinations;
+    this.checkedOffer = [...this.pointsModel.getOfferById(this.point.type, this.point.offers)];
+    this.offer = this.pointsModel.getOfferByType(this.point.type);
+    this.allOffers = this.pointsModel.getOffer();
+    this.destination = this.pointsModel.getDestinationById(this.point.destination);
+    this.allDestinations = this.pointsModel.getDestination();
   }
 
   getTemplate() {

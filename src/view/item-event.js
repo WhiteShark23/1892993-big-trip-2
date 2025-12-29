@@ -46,10 +46,11 @@ function createItemEventTemplate(point, offer, destination) {
 
 export default class ItemEventView {
 
-  constructor({point, offer, destination}) {
+  constructor(pointsModel, point) {
+    this.pointsModel = pointsModel;
     this.point = point;
-    this.offer = offer;
-    this.destination = destination;
+    this.offer = [...this.pointsModel.getOfferById(this.point.type, this.point.offers)];
+    this.destination = this.pointsModel.getDestinationById(this.point.destination);
   }
 
   getTemplate() {
