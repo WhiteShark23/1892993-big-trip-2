@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { getTimePeriod, humanizeTaskDueDate, DateFormat } from '../utils.js';
 import dayjs from 'dayjs';
 
@@ -44,28 +44,32 @@ function createItemEventTemplate(point, offer, destination) {
             </li>`;
 }
 
-export default class ItemEventView {
+export default class ItemEventView extends AbstractView {
+  #pointsModel = null;
+  #point = null;
+  #offer = null;
+  #destination = null;
+  #handleEditClick = null;
 
-  constructor(pointsModel, point) {
-    this.pointsModel = pointsModel;
-    this.point = point;
-    this.offer = [...this.pointsModel.getOfferById(this.point.type, this.point.offers)];
-    this.destination = this.pointsModel.getDestinationById(this.point.destination);
+
+  constructor({pointsModel, point, onEditClick}) {
+    super();
+    this.#pointsModel = pointsModel;
+    this.#point = point;
+    this.#offer = [...this.#pointsModel.getOfferById(this.#point.type, this.#point.offers)];
+    this.#destination = this.#pointsModel.getDestinationById(this.#point.destination);
+    this.#handleEditClick = onEditClick;
+
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editClickHandler);
   }
 
-  getTemplate() {
-    return createItemEventTemplate(this.point, this.offer, this.destination);
+  get template() {
+    return createItemEventTemplate(this.#point, this.#offer, this.#destination);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 }

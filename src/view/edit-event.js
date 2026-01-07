@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { humanizeTaskDueDate, DateFormat } from '../utils.js';
 
 function createOffferTemplate (offer, checkedOffer) {
@@ -151,40 +151,56 @@ function createEditEventTemplate(point, checkedOffer, offer, allOffers, destinat
             </li>`;
 }
 
-export default class EditEventView {
+export default class EditEventView extends AbstractView {
+  #pointsModel = null;
+  #point = null;
+  #checkedOffer = null;
+  #offer = null;
+  #allOffers = null;
+  #destination = null;
+  #allDestinations = null;
+  #handleFormSubmit = null;
+  #handleFormCloseClick = null;
 
-  constructor(pointsModel, point) {
-    this.pointsModel = pointsModel;
+  constructor({pointsModel, point, onFormSubmit, onFormCloseClick}) {
+    super();
+    this.#pointsModel = pointsModel;
 
-    this.point = point;
-    this.checkedOffer = [...this.pointsModel.getOfferById(this.point.type, this.point.offers)];
-    this.offer = this.pointsModel.getOfferByType(this.point.type);
-    this.allOffers = this.pointsModel.getOffer();
-    this.destination = this.pointsModel.getDestinationById(this.point.destination);
-    this.allDestinations = this.pointsModel.getDestination();
+    this.#point = point;
+    this.#checkedOffer = [...this.#pointsModel.getOfferById(this.#point.type, this.#point.offers)];
+    this.#offer = this.#pointsModel.getOfferByType(this.#point.type);
+    this.#allOffers = this.#pointsModel.getOffer();
+    this.#destination = this.#pointsModel.getDestinationById(this.#point.destination);
+    this.#allDestinations = this.#pointsModel.getDestination();
+    this.#handleFormSubmit = onFormSubmit;
+    this.#handleFormCloseClick = onFormCloseClick;
+
+    this.element.querySelector('form')
+      .addEventListener('submit', this.#formFormHandler);
+
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#formClickHandler);
   }
 
-  getTemplate() {
+  get template() {
 
     return createEditEventTemplate(
-      this.point,
-      this.checkedOffer,
-      this.offer,
-      this.allOffers,
-      this.destination,
-      this.allDestinations,
+      this.#point,
+      this.#checkedOffer,
+      this.#offer,
+      this.#allOffers,
+      this.#destination,
+      this.#allDestinations,
     );
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #formFormHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormSubmit();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #formClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormCloseClick();
+  };
 }
