@@ -1,5 +1,8 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizeTaskDueDate, DateFormat } from '../utils.js';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 function createOffferTemplate (offer, checkedOffer) {
   if (offer.offers.length === 0) {
@@ -164,6 +167,8 @@ export default class EditEventView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #handleFormCloseClick = null;
   #destinations = null;
+  #datePickerFrom = null;
+  #datePickerTo = null;
 
   constructor({pointsModel, point, onFormSubmit, onFormCloseClick}) {
     super();
@@ -200,6 +205,8 @@ export default class EditEventView extends AbstractStatefulView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__input--price').addEventListener('input', this.#priceInputHandler);
+
+    this.#setDatepickers();
   }
 
   #formFormHandler = (evt) => {
@@ -236,6 +243,59 @@ export default class EditEventView extends AbstractStatefulView {
     evt.preventDefault();
     const newPrice = parseInt(evt.target.value, 10) || 0;
     this._setState({ basePrice: newPrice });
+  };
+
+  #dateFromCloseHandler = ([userDate]) => {
+    this._setState({ dateFrom: userDate});
+    this.#datePickerTo.set('minDate', this._state.dateFrom);
+  };
+
+  #dateToCloseHandler = ([userDate]) => {
+    this._setState({ dateTo: userDate});
+    this.#datePickerFrom.set('maxDate', this._state.dateTo);
+  };
+
+  #setDatepickers = () => {
+    const [dateFromElement, dateToElement] = this.element.querySelectorAll('.event__input--time');
+    const commonConfig = {
+      dateFormat: 'd/m/y H:i',
+      enableTime: true,
+      locale: {firstDayOfWeek: 1},
+      'time_24hr': true,
+    };
+
+    this.#datePickerFrom = flatpickr(
+      dateFromElement,
+      {
+        ...commonConfig,
+        defaultDate: this._state.dateFrom,
+        onClose: this.#dateFromCloseHandler,
+        maxDate: this._state.dateTo,
+      }
+    );
+
+    this.#datePickerTo = flatpickr(
+      dateToElement,
+      {
+        ...commonConfig,
+        defaultDate: this._state.dateTo,
+        onClose: this.#dateToCloseHandler,
+        minDate: this._state.dateFrom,
+      }
+    );
+  };
+
+  removeElement = () => {
+    super.removeElement();
+    if(this.#datePickerFrom) {
+      this.#datePickerFrom.destroy();
+      this.#datePickerFrom = null;
+    }
+
+    if(this.#datePickerTo) {
+      this.#datePickerTo.destroy();
+      this.#datePickerTo = null;
+    }
   };
 
   static parseEditToState(edit) {
