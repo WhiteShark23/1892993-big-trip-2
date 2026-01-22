@@ -97,6 +97,8 @@ export default class BoardPresenter {
     this.#boardPoints = updateItem(this.#boardPoints, updatedEvent);
     this.#sourcedBoardEvents = updateItem(this.#sourcedBoardEvents, updatedEvent);
     this.#eventsPresenter.get(updatedEvent.id).init(this.#pointsModel, updatedEvent);
+    this.#clearEventList();
+    this.#renderItemsEvent();
   };
 
   #renderBoard() {
