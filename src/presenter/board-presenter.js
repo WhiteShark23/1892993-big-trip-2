@@ -1,6 +1,6 @@
 import SortView from '../view/sort-view.js';
 import { render, remove, RenderPosition } from '../framework/render.js';
-import ListEventsView from '../view/list-events.js';
+import ListEventsView from '../view/list-events-view.js';
 import EventPresenter from './event-presenter.js';
 import { SortType, UpdateType, UserAction, FilterType } from '../const.js';
 import { sortByPrice, sortByTime, sortByDay } from '../utils/util.js';
